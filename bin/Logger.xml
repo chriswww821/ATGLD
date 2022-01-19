@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Logger</name>
+    </assembly>
+    <members>
+        <member name="T:ATG.LoggerException">
+            <summary>
+            Custom exception class used for logging failures
+            </summary>
+        </member>
+        <member name="M:ATG.LoggerException.#ctor(System.String)">
+            <summary>
+            Plain exception with string message
+            </summary>
+            <param name="smessage">String message with the exception</param>
+        </member>
+        <member name="M:ATG.LoggerException.#ctor(System.String,System.Exception)">
+            <summary>
+            Exception with string message and attached source exception
+            </summary>
+            <param name="smessage">String message with the exception</param>
+            <param name="innerException">Logger-internal exception causing the error</param>
+        </member>
+        <member name="M:ATG.LoggerException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Exception with serialization/streaming contents
+            </summary>
+            <param name="info">Serialization info</param>
+            <param name="context">Streaming context</param>
+        </member>
+        <member name="T:ATG.Logger">
+            <summary>
+            Log file handling. Defaults to {exe}/logs/ folder, but can be customized via app.config.
+            Utilizes thread-controlled logging from a queue to prevent file edit collisions.
+            Must call Dispose() before exiting to ensure memory management
+            </summary>
+        </member>
+        <member name="F:ATG.Logger._logQueue">
+            <summary>
+            Queued list of output messages, printed sequentially.
+            Timestamps will be created at list insertion instead of printing, for output accuracy.
+            </summary>
+        </member>
+        <member name="F:ATG.Logger._logFileFolder">
+            <summary>
+            Folder in which log files should be stored
+            </summary>
+        </member>
+        <member name="F:ATG.Logger._logFolder">
+            <summary>
+            Subfolder within the app directory into which logs should be written
+            </summary>
+        </member>
+        <member name="F:ATG.Logger._thread">
+            <summary>
+            Logger thread, used to do all file writing so file edit collisions do not occur.
+            </summary>
+        </member>
+        <member name="F:ATG.Logger.disposed">
+            <summary>
+            Object disposed
+            </summary>
+        </member>
+        <member name="P:ATG.Logger.LogFolder">
+            <summary>
+            Subfolder within the app directory into which logs should be written
+            </summary>
+        </member>
+        <member name="P:ATG.Logger.QueueSize">
+            <summary>
+            Get size of current queue; should use to prevent shutting down prematurely
+            </summary>
+        </member>
+        <member name="P:ATG.Logger.Tick">
+            <summary>
+            Get duration of tick for next log write
+            </summary>
+        </member>
+        <member name="T:ATG.Logger.LogDelegate">
+            <summary>
+            Delegate for secondary app-specific log functions
+            </summary>
+        </member>
+        <member name="P:ATG.Logger.LogDelegates">
+            <summary>
+            List of delegate methods for secondary app-specific log functions
+            </summary>
+        </member>
+        <member name="P:ATG.Logger.ErrorDelegates">
+            <summary>
+            List of delegate methods for secondary app-specific error log functions
+            </summary>
+        </member>
+        <member name="M:ATG.Logger.DoWriting">
+            <summary>
+            Do actual file editing. Writes oldest item in queue and then drops it, until the queue is empty.
+            </summary>
+        </member>
+        <member name="M:ATG.Logger.WriterThread">
+            <summary>
+            Main log file editing loop.
+            On abort, finish writing existing queue and then exit.
+            </summary>
+        </member>
+        <member name="M:ATG.Logger.LogFilePath(System.String)">
+            <summary>
+            Get filename of the log file
+            </summary>
+            <param name="logDestination">Folder in which logs are stored</param>
+            <returns>Full file path</returns>
+        </member>
+        <member name="M:ATG.Logger.WriteLine(System.String,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Add timestamped line to the queue
+            </summary>
+            <param name="line">Contents of line</param>
+            <param name="showMethod">Explicitly list the calling method's full name</param>
+            <param name="skipOutput">Skip writing to log file (for volatile/temporary lines)</param>
+            <param name="error">Whether this line refers to an error</param>
+        </member>
+        <member name="M:ATG.Logger.ReadLines(System.Int32)">
+            <summary>
+            Read lines from the log file; this may not work with current threading setup, but is unused in local runs
+            </summary>
+            <param name="lineCount">Specify number of lines to read; default 50</param>
+            <returns>String containing the last lineCount lines from the log file</returns>
+        </member>
+        <member name="M:ATG.Logger.PrintFrame(System.Diagnostics.StackFrame,System.Boolean)">
+            <summary>
+            Create stack frame line for printing.
+            </summary>
+            <param name="frame">The stack frame with stack item details.</param>
+            <param name="fullStack">Whether or not the line is included as part of a full stack.</param>
+            <returns>String with stack frame details.</returns>
+        </member>
+        <member name="M:ATG.Logger.PrintError(System.Exception)">
+            <summary>
+            Create exception details for the previous method call.
+            Optional full stack trace with config logStack=true
+            </summary>
+            <param name="ex">Exception to write</param>
+            <returns>The exception details in string format</returns>
+        </member>
+        <member name="M:ATG.Logger.WriteError(System.Exception)">
+            <summary>
+            Write exception details to the log for the previous method call
+            Optional full stack trace with config logStack=true
+            </summary>
+            <param name="ex">Exception to write</param>
+        </member>
+        <member name="M:ATG.Logger.WriteProgress(System.Decimal,System.Decimal,System.Boolean)">
+            <summary>
+            Write progress to console (working animation plus progress bar)
+            </summary>
+            <param name="current">Current progress</param>
+            <param name="max">Max progress</param>
+            <param name="first">First print (true) will not clear the previous line</param>
+        </member>
+        <member name="M:ATG.Logger.MakeFolder">
+            <summary>
+            Set and create the log output directory
+            </summary>
+        </member>
+        <member name="M:ATG.Logger.CloseThread">
+            <summary>
+            Finish logging and close thread
+            </summary>
+        </member>
+        <member name="M:ATG.Logger.Dispose">
+            <summary>
+            Handle disposal. This method must be called prior to exiting the application to ensure memory management.
+            </summary>
+        </member>
+    </members>
+</doc>
